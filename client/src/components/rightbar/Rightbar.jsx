@@ -1,21 +1,20 @@
 import "./rightbar.css";
-import { Users } from "../../dummyData";
-import Online from "../online/Online";
 import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+import io from "socket.io-client";
 import { AuthContext } from "../../context/AuthContext";
+import axios from "axios";
+import Online from "../online/Online";
+import { Link } from "react-router-dom";
 import { Add, Remove } from "@material-ui/icons";
 
 export default function Rightbar({ user }) {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const [friends, setFriends] = useState([]);
-  const { user: currentUser, dispatch } = useContext(AuthContext);
-  const [followed, setFollowed] = useState(currentUser.followings.includes(user?.id));
-
-   useEffect(()=>{
-   setFollowed(currentUser.followings.includes(user?.id));
-   },[currentUser,user?.id])
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { user: currentUser,dispatch } = useContext(AuthContext);
+  const [followed, setFollowed] = useState(
+    currentUser.followings.includes(user?.id)
+  );
 
   useEffect(() => {
     const getFriends = async () => {
@@ -29,29 +28,37 @@ export default function Rightbar({ user }) {
     getFriends();
   }, [user]);
 
-  const handleClick = async () => {
-     try{
-         if(followed)
-         {
-          console.log(user._id);
-          await axios.put("/users/"+user._id+"/unfollow",{
-            userId:currentUser._id
-          
-          });
-          dispatch({type:"UNFOLLOW",payload:user._id})
-         }else{
-          await axios.put("/users/"+user._id+"/follow",{
-            userId:currentUser._id
-          });
-          dispatch({type:"FOLLOW",payload:user._id})
+  useEffect(() => {
+    const socket = io("http://localhost:8900");
+    socket.emit("addUser", currentUser?._id);
 
-         }
-     }catch(err)
-     {
-      console.log(err);
-     }
-     setFollowed(!followed)
+    socket.on("getUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [currentUser]);
+
+  const handleClick = async () => {
+    try {
+      if (followed) {
+        await axios.put(`/users/${user._id}/unfollow`, {
+          userId: currentUser._id,
+        });
+        dispatch({ type: "UNFOLLOW", payload: user._id });
+      } else {
+        await axios.put(`/users/${user._id}/follow`, {
+          userId: currentUser._id,
+        });
+        dispatch({ type: "FOLLOW", payload: user._id });
+      }
+      setFollowed(!followed);
+    } catch (err) {
+    }
   };
+
 
   const HomeRightbar = () => {
     return (
@@ -65,14 +72,13 @@ export default function Rightbar({ user }) {
         <img className="rightbarAd" src="assets/ad.png" alt="" />
         <h4 className="rightbarTitle">Online Friends</h4>
         <ul className="rightbarFriendList">
-          {Users.map((u) => (
-            <Online key={u.id} user={u} />
+          {onlineUsers.map((u) => (
+            <Online key={u.userId} user={u} />
           ))}
         </ul>
       </>
     );
   };
-
   const ProfileRightbar = () => {
     return (
       <>
@@ -128,6 +134,7 @@ export default function Rightbar({ user }) {
       </>
     );
   };
+
   return (
     <div className="rightbar">
       <div className="rightbarWrapper">
@@ -135,4 +142,5 @@ export default function Rightbar({ user }) {
       </div>
     </div>
   );
+  
 }
