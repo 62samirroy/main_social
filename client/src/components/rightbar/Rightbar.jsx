@@ -11,10 +11,8 @@ export default function Rightbar({ user }) {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const [friends, setFriends] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const { user: currentUser,dispatch } = useContext(AuthContext);
-  const [followed, setFollowed] = useState(
-    currentUser.followings.includes(user?.id)
-  );
+  const { user: currentUser, dispatch } = useContext(AuthContext);
+  const [followed, setFollowed] = useState(false);
 
   useEffect(() => {
     const getFriends = async () => {
@@ -41,7 +39,11 @@ export default function Rightbar({ user }) {
     };
   }, [currentUser]);
 
-  const handleClick = async () => {
+  useEffect(() => {
+    setFollowed(currentUser.followings.includes(user?._id));
+  }, [currentUser, user]);
+
+  const handleFollowToggle = async () => {
     try {
       if (followed) {
         await axios.put(`/users/${user._id}/unfollow`, {
@@ -56,9 +58,9 @@ export default function Rightbar({ user }) {
       }
       setFollowed(!followed);
     } catch (err) {
+      console.error("Error toggling follow status:", err);
     }
   };
-
 
   const HomeRightbar = () => {
     return (
@@ -66,7 +68,7 @@ export default function Rightbar({ user }) {
         <div className="birthdayContainer">
           <img className="birthdayImg" src="assets/gift.png" alt="" />
           <span className="birthdayText">
-            <b>Pola Foster</b> and <b>3 other friends</b> have a birhday today.
+            <b>Pola Foster</b> and <b>3 other friends</b> have a birthday today.
           </span>
         </div>
         <img className="rightbarAd" src="assets/ad.png" alt="" />
@@ -79,11 +81,12 @@ export default function Rightbar({ user }) {
       </>
     );
   };
+
   const ProfileRightbar = () => {
     return (
       <>
         {user.username !== currentUser.username && (
-          <button className="rightbarFollowButton" onClick={handleClick}>
+          <button className="rightbarFollowButton" onClick={handleFollowToggle}>
             {followed ? "Unfollow" : "Follow"}
             {followed ? <Remove /> : <Add />}
           </button>
@@ -103,7 +106,7 @@ export default function Rightbar({ user }) {
             <span className="rightbarInfoValue">
               {user.relationship === 1
                 ? "Single"
-                : user.relationship === 1
+                : user.relationship === 2
                 ? "Married"
                 : "-"}
             </span>
@@ -113,6 +116,7 @@ export default function Rightbar({ user }) {
         <div className="rightbarFollowings">
           {friends.map((friend) => (
             <Link
+              key={friend._id}
               to={"/profile/" + friend.username}
               style={{ textDecoration: "none" }}
             >
@@ -142,5 +146,4 @@ export default function Rightbar({ user }) {
       </div>
     </div>
   );
-  
 }

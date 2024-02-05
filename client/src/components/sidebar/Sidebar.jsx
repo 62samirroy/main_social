@@ -12,20 +12,7 @@ import {
 } from "@material-ui/icons";
 import { Users } from "../../dummyData";
 import CloseFriend from "../closeFriend/CloseFriend";
-import { Link } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
-
 export default function Sidebar() {
-
-  const { dispatch } = useContext(AuthContext);
-
-  const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem("user");
-    // Dispatch action to update context state
-    dispatch({ type: "LOGOUT" });
-  };
 
   return (
     <div className="sidebar">
@@ -68,9 +55,7 @@ export default function Sidebar() {
             <span className="sidebarListItemText">Courses</span>
           </li>
         </ul>
-        <Link >
-        <button className="sidebarButton" onClick={handleLogout}>log Out</button>
-        </Link>
+        
         <hr className="sidebarHr" />
         <ul className="sidebarFriendList">
           {Users.map((u) => (

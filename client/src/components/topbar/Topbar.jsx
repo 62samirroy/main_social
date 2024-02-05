@@ -14,14 +14,24 @@ export default function Topbar() {
     // Redirect to the login page when the login button is clicked
     history.push('/messenger');
   };
-  
+  const { dispatch } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem("user");
+    // Dispatch action to update context state
+    dispatch({ type: "LOGOUT" });
+  };
+
 
 
   return (
     <div className="topbarContainer">
       <div className="topbarLeft">
         <Link to="/" style={{ textDecoration: "none" }}>
-          <span className="logo">Lamasocial</span>
+          <div style={{width:"100px" ,height:"55px",justifyContent:"center",marginLeft:"20px"}}>
+        <img className="birthdayImg"  style={{width:"60px" ,height:"60px",paddingRight:"90px"}} src={PF + "person/logo.png"} alt="" />
+          </div>
         </Link>
       </div>
       <div className="topbarCenter">
@@ -34,10 +44,6 @@ export default function Topbar() {
         </div>
       </div>
       <div className="topbarRight">
-        <div className="topbarLinks">
-          <span className="topbarLink">Homepage</span>
-          <span className="topbarLink">Timeline</span>
-        </div>
         <div className="topbarIcons">
           <div className="topbarIconItem">
             <Person />
@@ -65,6 +71,12 @@ export default function Topbar() {
             className="topbarImg"
           />
         </Link>
+        <div className="topbarIconItem">    
+        <Link >
+        <button className="sidebarButton" onClick={handleLogout} style={{width:"80px",backgroundColor:"white",color:"black"}}>log Out</button>
+        </Link>
+      </div>
+
       </div>
     </div>
   );

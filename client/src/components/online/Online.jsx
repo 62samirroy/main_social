@@ -1,9 +1,9 @@
 import "./online.css";
 import { Link } from "react-router-dom";
 
-export default function Online({ user }) {
+export default function Online({user} ) {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
-
+   console.log(user);
   return (
     <li className="rightbarFriend">
       <div className="rightbarProfileImgContainer">
